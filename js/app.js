@@ -364,14 +364,12 @@ async function explore() {
     return;
   }
 
-  // the evaluation overlay paces the one-time load of the large tables
+  // the evaluation overlay paces the shard load for this combination
   const da = Store.drug(a), db = Store.drug(b);
   const pairLabel = `${drugDisplay(da) || a} × ${drugDisplay(db) || b}`;
   const calcP = runCalc(calcSteps(), pairLabel, seq);
   let bigErr = null;
-  if (!Store._bigLoaded) {
-    try { await Store.loadBig(() => {}); } catch (err) { bigErr = err; }
-  }
+  try { await Store.loadCombo(comboId); } catch (err) { bigErr = err; }
   await calcP;
   if (seq !== calcSeq) return;   // superseded by reset / a newer pair
 

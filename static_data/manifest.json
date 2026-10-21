@@ -43,12 +43,6 @@
    "ui_exposed": false,
    "module": "INTERNAL — label provenance; must NOT be shown in UI"
   },
-  "pathway_effects.json": {
-   "count": 5565,
-   "bytes": 13843707,
-   "ui_exposed": true,
-   "module": "4. 39-subsystem effects"
-  },
   "pathways.json": {
    "count": 39,
    "bytes": 6706,
@@ -61,23 +55,17 @@
    "ui_exposed": false,
    "module": "INTERNAL — raw class_score; must NOT be shown in UI"
   },
-  "reaction_effects.json": {
-   "count": 5565,
-   "bytes": 31683013,
-   "ui_exposed": true,
-   "module": "3. Reaction metabolic rewiring"
-  },
   "reactions.json": {
    "count": 2583,
    "bytes": 620344,
    "ui_exposed": true,
    "module": "reaction ontology"
   },
-  "shap_explanations.json": {
-   "count": 5565,
-   "bytes": 13161738,
+  "shards/": {
+   "count": 256,
+   "bytes": 11111161,
    "ui_exposed": true,
-   "module": "5. SHAP / model-associated features"
+   "module": "3+4+5. per-combination shards (reaction rewiring / 39-subsystem effects / SHAP), fetched on demand per query"
   }
  },
  "ui_rules": {
@@ -109,5 +97,13 @@
    "GPR rules"
   ]
  },
- "total_ui_bytes": 60123607
+ "total_ui_bytes": 12546030,
+ "sharding": {
+  "introduced": "round 49 (2026-10-21)",
+  "generator": "verify_shots/gen_shards.py",
+  "buckets": 256,
+  "bucket_fn": "FNV-1a 32-bit % 256 of combination_id (JS twin: data.js shardOf)",
+  "slim_format": "reaction_name/subsystem interned via reactions.json; floats rounded to 4 dp (UI shows at most 4)",
+  "per_query_bytes": "~45 KB raw per shard (was 58.7 MB whole-matrix on first query)"
+ }
 }

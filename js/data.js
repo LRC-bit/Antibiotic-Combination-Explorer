@@ -3,13 +3,13 @@
    Frontend does: Read -> Lookup -> Display.  No scientific computation.
    ============================================================ */
 
-const DATA_BASE = 'static_data/';
+const DATA_BASE = '../static_data/';
 
 /* 数据文件缓存戳:与 HTML 里的 ?v= 版本戳保持同步,每次发布一起 +1。
    loadJSON 用 cache:'force-cache',URL 不变时浏览器会一直复用旧副本 ——
    第 40 轮(药物中文名补全)是首次改动数据文件,加这个查询串保证新的
    drugs.json 立即生效(本地预览与部署后都适用)。 */
-const DATA_Q = '?v=54';
+const DATA_Q = '?v=55';
 
 /* ---------- small loader with cache ---------- */
 const _cache = {};
@@ -23,19 +23,29 @@ async function loadJSON(name) {
   return json;
 }
 
-/* ---------- lazy loader for the large files (loaded once, then cached) ---------- */
-const _lazyPromises = {};
+/* ---------- sharded loader for the three large tables (round 49) ----------
+   The monolithic reaction_effects / pathway_effects / shap_explanations
+   files (58.7 MB) were replaced by 256 per-combination shards under
+   static_data/shards/ (11.1 MB total; generator: verify_shots/gen_shards.py).
+   A query fetches only the shard holding its combination (~45 KB raw), so
+   the first result appears without waiting for the whole matrix.
+   Slim item format (one item per combination inside a shard):
+     c  : combination_id
+     rx : [[ [reaction_id, effect] x10 ] x3]   top_increased/decreased/absolute
+     pw : [[ 39 floats ] x4]                   aggregate/mean/meanAbs/sumAbs
+     sh : {pc, pn, tf:[[reaction_id, shap_value, effect] x10]}
+   reaction_name / subsystem are NOT stored per entry — they are looked up
+   in the eager reactions.json (Store.reactions), which covers every id
+   used by the top lists (verified at generation time). */
+const N_SHARDS = 256;
 
-function lazy(name, onProgress) {
-  if (_cache[name]) return Promise.resolve(_cache[name]);
-  if (!_lazyPromises[name]) {
-    if (onProgress) onProgress(name);
-    _lazyPromises[name] = loadJSON(name).catch(err => {
-      delete _lazyPromises[name];
-      throw err;
-    });
+function shardOf(id) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < id.length; i++) {
+    h ^= id.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
   }
-  return _lazyPromises[name];
+  return h % N_SHARDS;
 }
 
 /* ============================================================
@@ -85,7 +95,12 @@ const Store = {
   pathways: null,         // array of pathway objects
   manifest: null,
 
-  _bigLoaded: false,
+  _reactionEffects: new Map(),  // combination_id -> reconstructed item (per combo)
+  _pathwayEffects: new Map(),   // combination_id -> reconstructed item (per combo)
+  _shap: new Map(),             // combination_id -> reconstructed item (per combo)
+  _shardMeta: null,      // shard headers (subsystems, top_n, method texts…)
+  _shards: new Map(),    // shard number -> parsed shard json (session cache)
+  _loadedCombos: new Set(),
 
   /* ---- eager: everything the shell needs immediately (~1.4 MB) ---- */
   async init() {
@@ -114,24 +129,64 @@ const Store = {
     return this;
   },
 
-  /* ---- lazy: the three large files, loaded on first exploration ---- */
-  async loadBig(onProgress) {
-    if (this._bigLoaded) return;
-    const [re, pe, sh] = await Promise.all([
-      lazy('reaction_effects.json', onProgress),
-      lazy('pathway_effects.json', onProgress),
-      lazy('shap_explanations.json', onProgress),
-    ]);
-    this._reactionEffects = new Map(re.items.map(i => [i.combination_id, i]));
-    this._pathwayEffects = new Map(pe.items.map(i => [i.combination_id, i]));
-    this.pathwaySubsystems = pe.subsystems;
-    this.pathwayReactionCount = pe.reaction_count;
-    this.pathwayAggregation = pe.aggregation_method;
-    this._shap = new Map(sh.items.map(i => [i.combination_id, i]));
-    this.shapMethod = sh.method;
-    this.shapInterpretation = sh.interpretation;
-    this.topN = re.top_n;
-    this._bigLoaded = true;
+  /* ---- lazy: one shard per queried combination (round 49) ---- */
+  async loadCombo(comboId) {
+    if (this._loadedCombos.has(comboId)) return;
+    if (!this._shardMeta) {
+      this._shardMeta = await loadJSON('shards/meta.json');
+      this.pathwaySubsystems = this._shardMeta.subsystems;
+      this.pathwayReactionCount = this._shardMeta.reaction_count;
+      this.pathwayAggregation = this._shardMeta.aggregation_method;
+      this.shapMethod = this._shardMeta.method;
+      this.shapInterpretation = this._shardMeta.interpretation;
+      this.topN = this._shardMeta.top_n;
+    }
+    const n = shardOf(comboId);
+    let shard = this._shards.get(n);
+    if (!shard) {
+      shard = await loadJSON('shards/shard_' +
+                             String(n).padStart(3, '0') + '.json');
+      this._shards.set(n, shard);
+    }
+    const hit = shard.items.find(i => i.c === comboId);
+    if (!hit) throw new Error('shard ' + n + ' 中没有组合 ' + comboId);
+
+    /* Reconstruct the original per-combination shapes so every renderer
+       downstream is unchanged: names/subsystems come from the eager
+       reactions map (round-49 string interning). */
+    const rxEntry = pair => {
+      const rx = this.reactions.get(pair[0]) || {};
+      return { reaction_id: pair[0],
+               reaction_name: rx.reaction_name || pair[0],
+               subsystem: rx.subsystem || '',
+               effect: pair[1] };
+    };
+    this._reactionEffects.set(comboId, {
+      combination_id: comboId,
+      top_increased: hit.rx[0].map(rxEntry),
+      top_decreased: hit.rx[1].map(rxEntry),
+      top_absolute: hit.rx[2].map(rxEntry),
+    });
+    this._pathwayEffects.set(comboId, {
+      combination_id: comboId,
+      aggregate_effect: hit.pw[0],
+      mean_effect: hit.pw[1],
+      mean_abs_effect: hit.pw[2],
+      sum_abs_effect: hit.pw[3],
+    });
+    this._shap.set(comboId, {
+      combination_id: comboId,
+      prediction_class: hit.sh.pc,
+      prediction_name: hit.sh.pn,
+      top_features: hit.sh.tf.map((f, i) => {
+        const rx = this.reactions.get(f[0]) || {};
+        return { rank: i + 1, reaction_id: f[0],
+                 reaction_name: rx.reaction_name || f[0],
+                 subsystem: rx.subsystem || '',
+                 shap_value: f[1], effect: f[2] };
+      }),
+    });
+    this._loadedCombos.add(comboId);
   },
 
   /* ---- lookups (no computation, pure reads) ----

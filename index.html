@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>组合探索器 — 大肠杆菌抗生素组合探索器</title>
+<link rel="stylesheet" href="css/style.css?v=54">
+<script src="js/theme.js?v=54"></script>
+<script src="js/grid.js?v=54" defer></script>
+<script src="js/collapse.js?v=54" defer></script>
+</head>
+<body>
+
+<canvas id="bg-grid" aria-hidden="true"></canvas>
+
+<div id="err-banner" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:999;
+     background:#7f1d1d;color:#fff;font:13px/1.5 monospace;padding:10px 16px;white-space:pre-wrap"></div>
+<script>
+  /* surface runtime problems instead of letting them fail silently */
+  window.__showErr = function (m) {
+    var b = document.getElementById('err-banner');
+    b.style.display = 'block';
+    b.textContent = '运行错误: ' + m;
+  };
+  window.addEventListener('error', function (e) { window.__showErr(e.message); });
+  window.addEventListener('unhandledrejection', function (e) {
+    window.__showErr((e.reason && e.reason.message) || String(e.reason));
+  });
+</script>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">大肠杆菌 <span>抗生素组合探索器</span></a>
+    <div class="nav-links">
+      <a href="index.html" class="active">组合探索器</a>
+      <a href="about.html">方法说明</a>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="切换亮/暗主题" title="切换亮/暗主题">
+        <svg class="icon-sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="3.2"/><path d="M8 1.5v1.6M8 12.9v1.6M1.5 8h1.6M12.9 8h1.6M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M12.6 3.4l-1.1 1.1M4.5 11.5l-1.1 1.1"/></svg>
+        <svg class="icon-moon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M13.5 9.5A5.8 5.8 0 0 1 6.5 2.5a5.8 5.8 0 1 0 7 7z"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <!-- ============ boot ============ -->
+  <div id="boot-status" class="state"><div class="spinner"></div>正在准备评估环境…</div>
+
+  <div id="explorer" style="display:none">
+
+    <header class="hero hero-compact">
+      <span class="eyebrow">ACE · ANTIBIOTIC COMBINATION EXPLORER</span>
+      <h1>探索两种抗生素在 <i>大肠杆菌</i> 中如何相互作用</h1>
+      <p>在左侧选择两种抗生素,右侧给出组合结果、反应级与子系统级的代谢重构,
+         以及模型给出的关联特征。评估基于<i>大肠杆菌</i>基因组尺度代谢模型 iJO1366
+         与组合效应模型;各项结果的含义与科研语境,见<a href="about.html">方法说明</a>页。</p>
+    </header>
+
+    <div class="app-shell">
+
+      <!-- ==================== 左栏:选药 + 药物库 ==================== -->
+      <aside class="rail" id="rail">
+
+        <!-- ---- 药物选择(不参与编号:编号从右栏「组合结果」开始) ---- -->
+        <section class="section rail-block" id="select-section">
+          <div class="section-head">
+            <h2>药物选择</h2>
+          </div>
+
+          <div class="card picker-card">
+            <div class="selector-grid">
+              <div class="picker" id="picker-a">
+                <label>药物 1</label>
+                <input type="text" placeholder="搜索或输入名称…" autocomplete="off" spellcheck="false">
+                <div class="dropdown"></div>
+              </div>
+
+              <div class="plus">+</div>
+
+              <div class="picker" id="picker-b">
+                <label>药物 2</label>
+                <input type="text" placeholder="搜索或输入名称…" autocomplete="off" spellcheck="false">
+                <div class="dropdown"></div>
+              </div>
+            </div>
+
+            <div class="explore-row">
+              <button class="btn btn-ghost" id="reset-btn" style="display:none">清除选择</button>
+              <button class="btn" id="explore-btn" disabled>查询组合</button>
+            </div>
+            <div class="hint" id="pick-warn" style="display:none;color:var(--antagonism)"></div>
+          </div>
+        </section>
+
+        <!-- ---- 药物库(原独立页签,现并入左栏) ---- -->
+        <section class="section rail-block rail-lib" id="lib">
+          <div class="section-head">
+            <h2>药物库</h2>
+            <p>点行尾的 <b>+</b> 加入选择,再次点按即可移除。</p>
+          </div>
+
+          <div class="lib-toolbar">
+            <input type="text" id="lib-search" placeholder="搜索名称、中文名、机制或靶点…"
+                   autocomplete="off" spellcheck="false">
+            <span class="count-pill" id="lib-count"></span>
+          </div>
+          <div class="cat-bar" id="cat-bar"></div>
+          <div class="drug-list" id="drug-grid"></div>
+          <div class="empty-box" id="lib-empty" style="display:none">没有符合搜索条件的药物。</div>
+        </section>
+
+      </aside>
+
+      <!-- ==================== 右栏:结果 ==================== -->
+      <div class="results" id="results-col">
+
+        <!-- 空态:未选药时右栏直接给出方法说明(与 about 页同口径) -->
+        <div class="card result-empty" id="result-empty">
+          <div class="re-badge">方法说明 · METHOD</div>
+          <h3>这些结果是如何得出的</h3>
+          <p class="re-lead">在左侧选定两种抗生素 —— 可直接搜索,也可在药库点 <b>+</b> ——
+             点「查询组合」后,结果会依次出现在下面四节。在查询之前,这里先说明每一项
+             分别是什么、该怎么读。</p>
+          <div class="re-doc">
+            <section class="re-doc-sec">
+              <h4>组合结果的三个类别</h4>
+              <p>组合结果概括两种抗生素在<i>大肠杆菌</i>中联合作用的表现,分为三类:</p>
+              <ul class="class-list">
+                <li class="r-Synergy"><b>协同 Synergy</b><span>联合作用强于两种单药单独作用的加和预期</span></li>
+                <li class="r-Neutral"><b>中性 Neutral</b><span>联合作用与加性预期相近</span></li>
+                <li class="r-Antagonism"><b>拮抗 Antagonism</b><span>联合作用弱于加性预期</span></li>
+              </ul>
+              <p>三类划分描述联合作用相对于加性预期的强弱,是模拟代谢层面的比较。</p>
+            </section>
+            <section class="re-doc-sec">
+              <h4>非加性通量效应</h4>
+              <p>对每个反应,本节给出一个数值,即非加性通量效应:</p>
+              <p><code>效应值 = 组合通量 − 单药 A 通量 − 单药 B 通量</code></p>
+              <p>若两种药纯粹加性作用,该值为零;正值表示该反应通量高于加性预期,
+                 负值表示低于。它是对模拟通量分布的比较,本身并不直接说明细胞死亡、
+                 生长或机制。</p>
+            </section>
+            <section class="re-doc-sec">
+              <h4>反应级与子系统级重构</h4>
+              <p>反应级代谢重构展示所选组合中正效应最大、负效应最大、绝对效应最大的反应,
+                 每个反应以模型反应编号和名称标识,并附所属代谢子系统。</p>
+              <p>子系统级重构把这些效应按基因组尺度模型的子系统归属汇总,给出聚合效应、
+                 平均效应、平均绝对效应与绝对效应总和,并用雷达图标出前 8 大子系统:
+                 正向扰动从零平面向外辐射,负向扰动指向圆心。</p>
+            </section>
+            <section class="re-doc-sec">
+              <h4>模型关联特征</h4>
+              <p>最后一节列出组合效应模型在所选定药物对上最依赖的反应,称为<b>模型关联特征</b>,
+                 或<b>潜在的机制解读</b>。它们表明代谢描述中哪些部分对该组合影响最大。</p>
+              <p>它们<b>不是</b>已验证的机制,也<b>不是</b>因果陈述;每行以粗条给出模型关联值,
+                 细条给出该反应的代谢效应,两者量纲不同。</p>
+            </section>
+          </div>
+          <p class="re-foot">以上为概念级说明;数据来源、子系统划分与表述边界见
+             <a href="about.html">方法说明</a>页。所有展示量均由代谢模型与组合效应模型评估产出,
+             应结合实验跟进解读,而不应作为独立的生物学结论。</p>
+        </div>
+
+        <!-- ---- 1. 组合结果 ---- -->
+        <section class="section" id="result-section" style="display:none" data-collapse>
+          <div class="section-head">
+            <h2><span class="step-no">1</span>组合结果</h2>
+          </div>
+          <div class="card" id="result-card"></div>
+        </section>
+
+        <!-- ---- 2. 反应级代谢重构 ---- -->
+        <section class="section" id="rewiring-section" style="display:none" data-collapse>
+          <div class="section-head">
+            <h2><span class="step-no">2</span>反应级代谢重构</h2>
+            <p>每个反应的非加性通量效应:组合通量减去两种单药通量。</p>
+          </div>
+          <div class="card">
+            <div style="padding:18px 20px">
+              <div class="tabs" id="rx-tabs">
+                <button class="tab active" data-mode="top_increased">增强最多</button>
+                <button class="tab" data-mode="top_decreased">减弱最多</button>
+                <button class="tab" data-mode="top_absolute">绝对变化最大</button>
+              </div>
+              <div class="chart" id="rx-body"></div>
+              <div class="chart-legend">条形长度表示非加性通量效应的大小,<b class="eff pos">正向(增强)</b> / <b class="eff neg">负向(减弱)</b>;点击任意行查看反应详情。</div>
+              <div class="detail" id="rx-detail"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---- 3. 子系统级代谢重构 ---- -->
+        <section class="section" id="subsystem-section" style="display:none" data-collapse>
+          <div class="section-head">
+            <h2><span class="step-no">3</span>子系统级代谢重构</h2>
+            <p>在 iJO1366 模型的 39 个子系统上汇总的非加性效应。</p>
+          </div>
+          <div class="card">
+            <div class="subs-layout">
+              <div class="radar-wrap">
+                <div class="radar-title">扰动总览 · 前 8 大子系统</div>
+                <svg id="subs-radar" class="radar" viewBox="0 42 480 384" role="img"
+                     aria-label="子系统扰动雷达图:零平面为正八边形,正向扰动从零平面向外辐射,负向扰动从零平面指向圆心,不越过圆心"></svg>
+                <div class="radar-legend">
+                  <span class="lg-item"><span class="lg-dot pos"></span>正向扰动 · 向外辐射</span>
+                  <span class="lg-item"><span class="lg-dot neg"></span>负向扰动 · 指向圆心</span>
+                  <span class="lg-item"><svg class="lg-oct" viewBox="0 0 14 14" aria-hidden="true"><polygon points="7,1.4 11,3 12.6,7 11,11 7,12.6 3,11 1.4,7 3,3"/></svg>正八边形 = 零平面</span>
+                  <span class="lg-note">点击任意轴查看该子系统详情。</span>
+                </div>
+              </div>
+              <div class="subs-bars-wrap">
+                <div style="padding:18px 12px">
+                  <div class="bars" id="subs-bars"></div>
+                </div>
+                <div style="padding:0 20px 18px">
+                  <button class="btn btn-ghost btn-sm" id="subs-more" style="display:none"></button>
+                </div>
+              </div>
+            </div>
+            <div style="padding:0 20px 18px"><div class="detail" id="subs-detail"></div></div>
+          </div>
+        </section>
+
+        <!-- ---- 4. 模型关联特征 ---- -->
+        <section class="section" id="shap-section" style="display:none" data-collapse>
+          <div class="section-head">
+            <h2><span class="step-no">4</span>模型关联特征</h2>
+          </div>
+          <div class="card">
+            <div style="padding:18px 20px">
+              <div class="shap-note" id="shap-note"></div>
+              <div class="chart" id="shap-body"></div>
+              <div class="chart-legend">
+                <span class="lg-item"><span class="lg-bar thick"></span>粗条 = 模型关联值(SHAP)</span><span class="lg-item"><span class="lg-bar thin"></span>细条 = 该反应的代谢效应</span><span class="lg-note">两者量纲不同,各自按本图内的最大值缩放;点击任意行查看详情。</span>
+              </div>
+              <div class="detail" id="shap-detail"></div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<div class="toast" id="lib-toast" role="status"></div>
+
+<footer>
+  <div class="wrap">
+    大肠杆菌抗生素组合探索器 · 基于 iJO1366 代谢模型的组合效应评估工具。
+  </div>
+</footer>
+
+<script src="js/data.js?v=54"></script>
+<script src="js/app.js?v=54"></script>
+</body>
+</html>

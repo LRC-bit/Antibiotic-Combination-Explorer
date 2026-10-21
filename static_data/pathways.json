@@ -1,0 +1,242 @@
+{
+ "data_version": "v1",
+ "schema_version": "web-static-v3",
+ "count": 39,
+ "ontology": "iJO1366 39 subsystems (includes 'tRNA Charging')",
+ "items": [
+  {
+   "pathway_id": "pw_alanine_and_aspartate_metabolism",
+   "pathway_name": "Alanine and Aspartate Metabolism",
+   "n_reactions": 9,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_alternate_carbon_metabolism",
+   "pathway_name": "Alternate Carbon Metabolism",
+   "n_reactions": 195,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_anaplerotic_reactions",
+   "pathway_name": "Anaplerotic Reactions",
+   "n_reactions": 8,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_arginine_and_proline_metabolism",
+   "pathway_name": "Arginine and Proline Metabolism",
+   "n_reactions": 40,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_biomass_and_maintenance_functions",
+   "pathway_name": "Biomass and maintenance functions",
+   "n_reactions": 4,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_cell_envelope_biosynthesis",
+   "pathway_name": "Cell Envelope Biosynthesis",
+   "n_reactions": 134,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_citric_acid_cycle",
+   "pathway_name": "Citric Acid Cycle",
+   "n_reactions": 14,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_cofactor_and_prosthetic_group_biosynthesis",
+   "pathway_name": "Cofactor and Prosthetic Group Biosynthesis",
+   "n_reactions": 219,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_cysteine_metabolism",
+   "pathway_name": "Cysteine Metabolism",
+   "n_reactions": 13,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_extracellular_exchange",
+   "pathway_name": "Extracellular exchange",
+   "n_reactions": 324,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_folate_metabolism",
+   "pathway_name": "Folate Metabolism",
+   "n_reactions": 9,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_glutamate_metabolism",
+   "pathway_name": "Glutamate Metabolism",
+   "n_reactions": 6,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_glycerophospholipid_metabolism",
+   "pathway_name": "Glycerophospholipid Metabolism",
+   "n_reactions": 246,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_glycine_and_serine_metabolism",
+   "pathway_name": "Glycine and Serine Metabolism",
+   "n_reactions": 14,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_glycolysis_gluconeogenesis",
+   "pathway_name": "Glycolysis/Gluconeogenesis",
+   "n_reactions": 22,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_glyoxylate_metabolism",
+   "pathway_name": "Glyoxylate Metabolism",
+   "n_reactions": 4,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_histidine_metabolism",
+   "pathway_name": "Histidine Metabolism",
+   "n_reactions": 10,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_inorganic_ion_transport_and_metabolism",
+   "pathway_name": "Inorganic Ion Transport and Metabolism",
+   "n_reactions": 112,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_intracellular_demand",
+   "pathway_name": "Intracellular demand",
+   "n_reactions": 6,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_lipopolysaccharide_biosynthesis_recycling",
+   "pathway_name": "Lipopolysaccharide Biosynthesis / Recycling",
+   "n_reactions": 71,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_membrane_lipid_metabolism",
+   "pathway_name": "Membrane Lipid Metabolism",
+   "n_reactions": 41,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_methionine_metabolism",
+   "pathway_name": "Methionine Metabolism",
+   "n_reactions": 15,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_methylglyoxal_metabolism",
+   "pathway_name": "Methylglyoxal Metabolism",
+   "n_reactions": 9,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_murein_biosynthesis",
+   "pathway_name": "Murein Biosynthesis",
+   "n_reactions": 15,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_murein_recycling",
+   "pathway_name": "Murein Recycling",
+   "n_reactions": 38,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_nitrogen_metabolism",
+   "pathway_name": "Nitrogen Metabolism",
+   "n_reactions": 13,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_nucleotide_salvage_pathway",
+   "pathway_name": "Nucleotide Salvage Pathway",
+   "n_reactions": 139,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_oxidative_phosphorylation",
+   "pathway_name": "Oxidative Phosphorylation",
+   "n_reactions": 52,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_pentose_phosphate_pathway",
+   "pathway_name": "Pentose Phosphate Pathway",
+   "n_reactions": 12,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_purine_and_pyrimidine_biosynthesis",
+   "pathway_name": "Purine and Pyrimidine Biosynthesis",
+   "n_reactions": 25,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_pyruvate_metabolism",
+   "pathway_name": "Pyruvate Metabolism",
+   "n_reactions": 10,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_threonine_and_lysine_metabolism",
+   "pathway_name": "Threonine and Lysine Metabolism",
+   "n_reactions": 19,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_transport_inner_membrane",
+   "pathway_name": "Transport, Inner Membrane",
+   "n_reactions": 332,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_transport_outer_membrane",
+   "pathway_name": "Transport, Outer Membrane",
+   "n_reactions": 46,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_transport_outer_membrane_porin",
+   "pathway_name": "Transport, Outer Membrane Porin",
+   "n_reactions": 270,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_tyrosine_tryptophan_and_phenylalanine_metabolism",
+   "pathway_name": "Tyrosine, Tryptophan, and Phenylalanine Metabolism",
+   "n_reactions": 23,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_unassigned",
+   "pathway_name": "Unassigned",
+   "n_reactions": 26,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_valine_leucine_and_isoleucine_metabolism",
+   "pathway_name": "Valine, Leucine, and Isoleucine Metabolism",
+   "n_reactions": 16,
+   "ontology_source": "iJO1366"
+  },
+  {
+   "pathway_id": "pw_trna_charging",
+   "pathway_name": "tRNA Charging",
+   "n_reactions": 22,
+   "ontology_source": "iJO1366"
+  }
+ ]
+}

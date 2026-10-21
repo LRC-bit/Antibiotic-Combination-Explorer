@@ -1,0 +1,113 @@
+{
+ "schema_version": "web-final-v1",
+ "data_version": "v1",
+ "generated_at": "2026-10-07T14:46:35",
+ "stage": "Phase 3 — Final Web Data Preparation",
+ "model_version": "3class_baseline",
+ "static_only": true,
+ "model_runtime": false,
+ "moma_runtime": false,
+ "shap_runtime": false,
+ "backend_required": false,
+ "counts": {
+  "drugs": 106,
+  "combinations": 5565,
+  "reactions": 2583,
+  "subsystems": 39,
+  "combination_results": 5565,
+  "shap_explanations": 5565,
+  "top_n": 10
+ },
+ "files": {
+  "combination_results.json": {
+   "count": 5565,
+   "bytes": 778439,
+   "ui_exposed": true,
+   "module": "2. Combination Result"
+  },
+  "combinations.json": {
+   "count": 5565,
+   "bytes": 1495589,
+   "ui_exposed": false,
+   "module": "INTERNAL — contains coverage / score_reliable; must NOT be shown in UI"
+  },
+  "drugs.json": {
+   "count": 106,
+   "bytes": 29380,
+   "ui_exposed": true,
+   "module": "1. Drug metadata"
+  },
+  "evidence.json": {
+   "count": 0,
+   "bytes": 127606,
+   "ui_exposed": false,
+   "module": "INTERNAL — label provenance; must NOT be shown in UI"
+  },
+  "pathway_effects.json": {
+   "count": 5565,
+   "bytes": 13843707,
+   "ui_exposed": true,
+   "module": "4. 39-subsystem effects"
+  },
+  "pathways.json": {
+   "count": 39,
+   "bytes": 6706,
+   "ui_exposed": true,
+   "module": "subsystem ontology"
+  },
+  "predictions.json": {
+   "count": 5565,
+   "bytes": 1885449,
+   "ui_exposed": false,
+   "module": "INTERNAL — raw class_score; must NOT be shown in UI"
+  },
+  "reaction_effects.json": {
+   "count": 5565,
+   "bytes": 31683013,
+   "ui_exposed": true,
+   "module": "3. Reaction metabolic rewiring"
+  },
+  "reactions.json": {
+   "count": 2583,
+   "bytes": 620344,
+   "ui_exposed": true,
+   "module": "reaction ontology"
+  },
+  "shap_explanations.json": {
+   "count": 5565,
+   "bytes": 13161738,
+   "ui_exposed": true,
+   "module": "5. SHAP / model-associated features"
+  }
+ },
+ "ui_rules": {
+  "show": [
+   "drug_a",
+   "drug_b",
+   "result (Synergy/Neutral/Antagonism)",
+   "top affected reactions",
+   "subsystem effects",
+   "SHAP model-associated features"
+  ],
+  "hide": [
+   "prediction_score",
+   "class_score",
+   "probability",
+   "confidence",
+   "accuracy",
+   "coverage",
+   "score_reliable",
+   "used_in_training",
+   "in_training_411",
+   "result provenance (experimental vs model)",
+   "OOF",
+   "CV metrics",
+   "training sample counts",
+   "feature selection info",
+   "2583->967->580",
+   "MOMA parameters",
+   "GPR rules"
+  ]
+ },
+ "total_ui_bytes": 60123607
+}

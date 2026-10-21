@@ -3,13 +3,22 @@
    Frontend does: Read -> Lookup -> Display.  No scientific computation.
    ============================================================ */
 
-const DATA_BASE = '../static_data/';
+/* 数据目录:从页面位置自动推导,一份代码同时适配两种布局 ——
+   ① 开发快照(页面在 /frontend/ 下,数据在站点根 /static_data/)
+   ② GitHub 包(页面在仓库根或项目子路径 /<repo>/ 下,数据在同级 static_data/)
+   相对路径在这里不可靠:GitHub Pages 项目站点的页面带子路径,
+   '../static_data/' 会跳出项目根变成 404(第 49 轮实测踩到)。 */
+const DATA_BASE = (function () {
+  const dir = location.pathname.replace(/\/[^\/]*$/, '/');  // 页面所在目录
+  const root = dir.replace(/\/frontend\/$/, '/');            // 快照布局:往上退一级
+  return root + 'static_data/';
+})();
 
 /* 数据文件缓存戳:与 HTML 里的 ?v= 版本戳保持同步,每次发布一起 +1。
    loadJSON 用 cache:'force-cache',URL 不变时浏览器会一直复用旧副本 ——
    第 40 轮(药物中文名补全)是首次改动数据文件,加这个查询串保证新的
    drugs.json 立即生效(本地预览与部署后都适用)。 */
-const DATA_Q = '?v=55';
+const DATA_Q = '?v=56';
 
 /* ---------- small loader with cache ---------- */
 const _cache = {};
